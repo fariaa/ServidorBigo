@@ -1,0 +1,134 @@
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.SpringLayout;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.io.ObjectInputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.List;
+import java.util.Scanner;
+import java.util.TreeSet;
+import java.awt.event.ActionEvent;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+
+public class teste extends JFrame {
+
+	private JPanel contentPane;
+	
+	PrintWriter escritor;
+	private JTextField txtEmail;
+	private JTextField txtSenha;
+	JLabel lblMsg;
+	Scanner leitor;
+	
+	private class EscutaServidor implements Runnable
+	{
+		@Override
+		public void run() {
+			String msg;
+			while((msg = leitor.nextLine()) != null)
+			{
+				if(!msg.equals("")){
+					lblMsg.setText(msg += msg+"\n");
+				}
+				System.out.println("msg: " + msg);
+				
+				
+			}
+			
+		}	
+	}
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					teste frame = new teste();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public teste() {
+		lblMsg = new JLabel("msg");
+		try{
+			Socket socket = new Socket("192.168.0.11", 5000);
+			escritor = new PrintWriter(socket.getOutputStream());
+			leitor = new Scanner(socket.getInputStream());
+			
+			//ObjectInputStream in= new ObjectInputStream(socket.getInputStream());
+			//List<Object> lista=(List<Object>)in.readObject();//recebendo a lista
+            //for(Object i: lista)
+               // System.out.println(i.toString());
+            //socket.close();
+            
+            
+			new Thread(new EscutaServidor()).start();
+		}catch(Exception ex){}
+		
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(new BorderLayout(0, 0));
+		setContentPane(contentPane);
+		
+		JPanel panel = new JPanel();
+		contentPane.add(panel, BorderLayout.CENTER);
+		SpringLayout sl_panel = new SpringLayout();
+		panel.setLayout(sl_panel);
+		
+		JButton btnLogar = new JButton("Logar");
+		btnLogar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				escritor.println("AUTENTICACAO;"+txtEmail.getText()+";"+txtSenha.getText());
+				escritor.flush();
+			}
+		});
+		panel.add(btnLogar);
+		
+		JLabel lblEmail = new JLabel("Email: ");
+		sl_panel.putConstraint(SpringLayout.NORTH, lblEmail, 62, SpringLayout.NORTH, panel);
+		sl_panel.putConstraint(SpringLayout.WEST, lblEmail, 68, SpringLayout.WEST, panel);
+		panel.add(lblEmail);
+		
+		txtEmail = new JTextField();
+		sl_panel.putConstraint(SpringLayout.EAST, btnLogar, 0, SpringLayout.EAST, txtEmail);
+		sl_panel.putConstraint(SpringLayout.NORTH, txtEmail, 0, SpringLayout.NORTH, lblEmail);
+		sl_panel.putConstraint(SpringLayout.WEST, txtEmail, 6, SpringLayout.EAST, lblEmail);
+		panel.add(txtEmail);
+		txtEmail.setColumns(10);
+		
+		JLabel lblSenha = new JLabel("Senha: ");
+		sl_panel.putConstraint(SpringLayout.NORTH, lblSenha, 6, SpringLayout.SOUTH, lblEmail);
+		sl_panel.putConstraint(SpringLayout.WEST, lblSenha, 49, SpringLayout.WEST, panel);
+		panel.add(lblSenha);
+		
+		txtSenha = new JTextField();
+		sl_panel.putConstraint(SpringLayout.NORTH, btnLogar, 19, SpringLayout.SOUTH, txtSenha);
+		sl_panel.putConstraint(SpringLayout.NORTH, txtSenha, 2, SpringLayout.SOUTH, txtEmail);
+		sl_panel.putConstraint(SpringLayout.WEST, txtSenha, 0, SpringLayout.WEST, txtEmail);
+		panel.add(txtSenha);
+		txtSenha.setColumns(10);
+		
+		
+		sl_panel.putConstraint(SpringLayout.NORTH, lblMsg, 0, SpringLayout.NORTH, lblSenha);
+		sl_panel.putConstraint(SpringLayout.WEST, lblMsg, 82, SpringLayout.EAST, txtSenha);
+		panel.add(lblMsg);
+	}
+}

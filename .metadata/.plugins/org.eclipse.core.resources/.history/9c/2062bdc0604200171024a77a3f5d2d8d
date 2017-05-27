@@ -1,0 +1,45 @@
+package servidor;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import bd.dbos.Jogador;
+
+public class Servidor extends Thread {
+	private static List<Jogador> listaJogadores = new ArrayList<>();
+	private static List<Socket> listaCliente = new ArrayList<>();
+	private ServerSocket servidor;
+	public Sorteio sorteio;
+	
+	public Servidor() throws IOException
+	{
+		this.servidor = new ServerSocket(5000);
+		this.sorteio = new Sorteio(listaCliente);
+		while(true)
+		{
+			try
+			{
+				Socket cliente = servidor.accept();
+				System.out.println("servidor");
+				Record record = new Record(cliente);
+				record.start();
+				Acesso acesso  = new Acesso(cliente, record, listaJogadores, listaCliente);
+				acesso.start();
+				this.sorteio.start();
+				new Thread(new ServirCliente(cliente, this.sorteio)).start();
+				
+			}catch(IOException e){}
+		}
+	}
+	
+	public static void main(String[] args) {
+		try
+		{
+			Servidor servidor =  new Servidor();
+			servidor.start();
+			
+		}catch(Exception e) {}
+	}
+}

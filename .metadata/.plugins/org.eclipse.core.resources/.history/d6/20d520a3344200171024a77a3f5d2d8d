@@ -1,0 +1,131 @@
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.TreeSet;
+
+import GeradoraCartelaNumeros.GeradoraCartelaNumeros;
+import bd.*;
+import bd.daos.Jogadores;
+import bd.dbos.Jogador;
+
+
+public class Servidor {
+	int indexCartela = 0;
+	ServerSocket server;
+	
+	List<Jogador> jogadoresOnline = new ArrayList<>();
+	List<PrintWriter> escritores = new ArrayList<>();
+	ArrayList<TreeSet<Integer>> cartelas = GeradoraCartelaNumeros.gerarTabelasRodada(3);
+	
+	//ConexaoMySql2 c;
+	
+	//Jogador jo;
+		  
+	//lista de jogadores
+	//lista de cartelas
+	//acesso ao banco de dados
+	
+
+	private Jogador autenticacao(String email, String senha) throws Exception
+	{
+		BD bd = new BD();
+		Jogadores jogadores = new Jogadores();
+		Jogador jogador = jogadores.atenticacao(email, senha);
+		if(jogador != null)
+		{
+			jogadoresOnline.add(jogador);
+			return jogador;
+		}
+		
+		return null;
+	}
+	
+	private void enviarMensagem(String msg)
+	{
+		for(PrintWriter m: escritores)
+		{
+			m.println(msg);
+			m.flush();
+		}
+	}
+	
+	public Servidor() throws Exception{
+		try{
+			BD bd = new BD();
+			Jogadores j = new Jogadores();
+			String jogadoresRecords = "";
+			server = new ServerSocket(5000);
+			while(true){
+				Socket socket = server.accept();
+				
+				List<Jogador> records = j.getJogadoresRecords();
+				for(Jogador jo: records)
+				{
+					jogadoresRecords += jo.getEmail() + "," + jo.getQtdVitoriasMes() + ";\n"; 
+					System.out.println("Jogador: " + jo.getCodigo());
+				}
+				new Thread(new ServirJogador(socket)).start();
+				PrintWriter escritor = new PrintWriter(socket.getOutputStream());
+				escritor.println(jogadoresRecords);
+				escritor.flush();
+			}
+		}catch(IOException e){}
+	}
+	
+	private class ServirJogador implements Runnable {
+		Scanner leitor;
+		Socket socketUtil;
+		
+		public ServirJogador(Socket socket)
+		{
+			socketUtil = socket; 
+			try{
+				leitor = new Scanner(socket.getInputStream());
+			}catch(IOException e){ }
+		}
+		
+		@Override
+		public void run() {
+			String msg;
+			try{
+				while((msg = leitor.nextLine()) != null){
+					//login
+					System.out.println(leitor.nextLine());
+					if(msg.contains("AUTENTICACAO"))
+					{
+						System.out.println("Entrou no validador");
+						// msg: "AUTENTICACAO;EMAIL;SENHA"
+						String[] partes = msg.split(";");
+						String email = partes[1];
+						String senha = partes[2];
+						Jogador j = autenticacao(email, senha);
+						System.out.println("jogador: " + j.getCodigo());
+						if(j != null)
+						{
+							//Criar um PrintWriter para cada jogador
+							PrintWriter escritor = new PrintWriter(socketUtil.getOutputStream());
+							escritor.println("tab: " + cartelas.get(indexCartela).toString());
+							escritor.println("AUTENTICAO:CONECTADO;" + cartelas.get(indexCartela).toString());
+							escritor.flush();
+							indexCartela++;
+							escritores.add(escritor);
+						}
+					}
+				}
+			}catch(Exception ex){ }
+		}
+	}
+	
+	public static void main(String[] args) {
+		try{
+			new Servidor();
+		}catch(Exception ex) {
+			
+		}
+	}
+
+}

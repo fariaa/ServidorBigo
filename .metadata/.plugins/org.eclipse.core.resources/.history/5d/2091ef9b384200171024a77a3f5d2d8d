@@ -1,0 +1,11 @@
+package servidor;
+
+import java.io.PrintWriter;
+import java.util.Scanner;
+
+public class ServirAcesso extends Thread {
+	private PrintWriter leitura;
+	private 
+	public ServirAcesso(Socket cliente)
+	
+}

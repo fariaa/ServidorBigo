@@ -1,0 +1,256 @@
+package bd.daos;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import bd.*;
+import bd.core.*;
+import bd.dbos.*;
+
+public class Jogadores
+{
+	public Jogador atenticacao(String email, String senha) throws Exception
+	{
+		
+		String sql;
+
+        sql = "SELECT * " +
+              "FROM BINGO.JOGADOR " +
+              "WHERE EMAIL=? " +
+              "AND SENHA=?";
+
+        BD.comando.prepareStatement (sql);
+
+        BD.comando.setString (1, email);
+        BD.comando.setString (2, senha);
+        MeuResultSet resultado = (MeuResultSet)BD.comando.executeQuery ();
+
+        if(!resultado.first())
+        	return null;
+        
+        return	new Jogador (resultado.getInt   ("CODIGO"),
+                	         resultado.getString("EMAIL"));	
+	}
+	
+    public boolean cadastrado (int codigo, String email, String senha) throws Exception
+    {
+        boolean retorno = false;
+
+        try
+        {
+            String sql;
+            
+            sql = "insert into bingo.jogador(codigo, email, senha, primeiradatames, qtdvitoriasmes)values "+
+            "(?, ?, ?, '12/12/12', 0) ";
+
+            sql = "SELECT * " +
+                  "FROM BINGO.JOGADOR " +
+                  "WHERE CODIGO = ?";
+
+            BD.comando.prepareStatement (sql);
+
+            BD.comando.setInt (1, codigo);
+            BD.comando.setString (2, codigo);
+            BD.comando.setInt (1, codigo);
+
+            MeuResultSet resultado = (MeuResultSet)BD.comando.executeQuery ();
+
+            retorno = resultado.first();
+
+            /* // ou, se preferirmos,
+
+            String sql;
+
+            sql = "SELECT COUNT(*) AS QUANTOS " +
+                  "FROM Jogadores " +
+                  "WHERE CODIGO = ?";
+
+            BD.comando.prepareStatement (sql);
+
+            BD.comando.setInt (1, codigo);
+
+            MeuResultSet resultado = (MeuResultSet)BD.comando.executeQuery ();
+
+            resultado.first();
+
+            retorno = resultado.getInt("QUANTOS") != 0;
+
+            */
+        }
+        catch (SQLException erro)
+        {
+            throw new Exception ("Erro ao procurar Jogador");
+        }
+
+        return retorno;
+    }
+
+    public void incluir (Jogador jogador) throws Exception
+    {
+        if (jogador==null)
+            throw new Exception ("Jogador nao fornecido");
+
+        try
+        {
+            String sql;
+
+            sql = "INSERT INTO BINGO.JOGADOR " +
+                  "(CODIGO,EMAIL) " +
+                  "VALUES " +
+                  "(?,?)";
+
+            BD.comando.prepareStatement (sql);
+
+            BD.comando.setInt    (1, jogador.getCodigo ());
+            BD.comando.setString (2, jogador.getEmail());
+
+            BD.comando.executeUpdate ();
+            BD.comando.commit        ();
+        }
+        catch (SQLException erro)
+        {
+            throw new Exception ("Erro ao inserir jogador");
+        }
+    }
+
+    public void excluir (int codigo) throws Exception
+    {
+        if (!cadastrado (codigo))
+            throw new Exception ("Nao cadastrado");
+
+        try
+        {
+            String sql;
+
+            sql = "DELETE FROM BINGO.JOGADOR " +
+                  "WHERE CODIGO=?";
+
+            BD.comando.prepareStatement (sql);
+
+            BD.comando.setInt (1, codigo);
+
+            BD.comando.executeUpdate ();
+            BD.comando.commit        ();        }
+        catch (SQLException erro)
+        {
+            throw new Exception ("Erro ao excluir jogador");
+        }
+    }
+
+    public void alterar (Jogador jogador) throws Exception
+    {
+        if (jogador==null)
+            throw new Exception ("Jogador nao fornecido");
+
+        if (!cadastrado (jogador.getCodigo()))
+            throw new Exception ("Nao cadastrado");
+
+        try
+        {
+            String sql;
+
+            sql = "UPDATE BINGO.JOGADOR " +
+                  "SET EMAIL=? " +
+                  "WHERE CODIGO = ?";
+
+            BD.comando.prepareStatement (sql);
+
+            BD.comando.setString (1, jogador.getEmail());
+            BD.comando.setFloat  (2, jogador.getCodigo());
+
+            BD.comando.executeUpdate ();
+            BD.comando.commit        ();
+        }
+        catch (SQLException erro)
+        {
+            throw new Exception ("Erro ao atualizar dados de jogador");
+        }
+    }
+
+    public Jogador getJogador (int codigo) throws Exception
+    {
+    	Jogador jogador = null;
+
+        try
+        {
+            String sql;
+
+            sql = "SELECT * " +
+                  "FROM BINGO.JOGADOR " +
+                  "WHERE CODIGO = ?";
+
+            BD.comando.prepareStatement (sql);
+
+            BD.comando.setInt (1, codigo);
+
+            MeuResultSet resultado = (MeuResultSet)BD.comando.executeQuery ();
+
+            if (!resultado.first())
+                throw new Exception ("Nao cadastrado");
+
+            jogador = new Jogador (resultado.getInt   ("CODIGO"),
+                               	   resultado.getString("EMAIL"));
+        }
+        catch (SQLException erro)
+        {
+            throw new Exception ("Erro ao procurar Jogador");
+        }
+
+        return jogador;
+    }
+    
+    public MeuResultSet getJogadores () throws Exception
+    {
+        MeuResultSet resultado = null;
+
+        try
+        {
+            String sql;
+
+            sql = "SELECT * " +
+                  "FROM BINGO.JOGADOR";
+
+            BD.comando.prepareStatement (sql);
+
+            resultado = (MeuResultSet)BD.comando.executeQuery ();
+        }
+        catch (SQLException erro)
+        {
+            throw new Exception ("Erro ao recuperar Jogadores");
+        }
+
+        return resultado;
+    }
+    
+    public List<Jogador> getJogadoresRecords () throws Exception
+    {
+    	List<Jogador> jogadores = new ArrayList<>();
+        MeuResultSet resultado = null;
+
+        try
+        {
+            String sql;
+
+            sql = "SELECT * FROM BINGO.JOGADOR ORDER BY QTDVITORIASMES DESC LIMIT 3";
+
+            BD.comando.prepareStatement (sql);
+
+            resultado = (MeuResultSet)BD.comando.executeQuery ();
+            
+            while(resultado.next())
+            {
+            	jogadores.add(new Jogador(resultado.getInt("CODIGO"),
+            							  resultado.getString("EMAIL"),
+            							  resultado.getString("SENHA"),
+            							  resultado.getString("PRIMEIRADATAMES"), 
+            							  resultado.getInt("QTDVITORIASMES")));
+            }
+            return jogadores;
+        }
+        catch (SQLException erro)
+        {
+            throw new Exception ("Erro ao recuperar Jogadores");
+        }
+    }
+}

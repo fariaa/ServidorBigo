@@ -1,0 +1,57 @@
+package servidor;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
+
+import bd.BD;
+import bd.daos.Jogadores;
+import bd.dbos.Jogador;
+
+public class Acesso extends Thread {
+	//private Socket cliente;
+	private Scanner leitor;
+	private Record record;
+	private boolean isAcesso;
+	private BD bd; 
+	private void isAcesso(boolean isAcesso)
+	{
+		this.isAcesso = isAcesso;
+	}
+	
+	public Acesso(Socket cliente, Record record) throws IOException
+	{
+		this.record = record;
+		//this.cliente = cliente;
+		this.leitor = new Scanner(cliente.getInputStream());
+	}
+	
+	private boolean autenticacao(String t)
+	{
+		Jogadores jogadorDao  = new Jogadores();
+		
+		// msg: "AUTENTICACAO;EMAIL;SENHA"
+		String[] partes = t.split(";");
+		String email = partes[1];
+		String senha = partes[2];
+		return false;
+	}
+	
+	public void run()
+	{
+		String teclado;
+		while(!isAcesso)
+		{
+			teclado = leitor.nextLine();
+			if(teclado.contains("AUTENTICACAO"))
+			{
+				System.out.println("Entrou no validador");
+				if(autenticacao(teclado))
+				{
+					
+				}
+			}
+		}
+	}
+}

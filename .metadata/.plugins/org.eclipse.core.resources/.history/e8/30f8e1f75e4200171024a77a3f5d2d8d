@@ -1,0 +1,14 @@
+package servidor;
+
+public class ExecutaServidor {
+	
+	public static void main(String[] args) {
+		try
+		{
+			Servidor servidor;
+			servidor.start();
+			
+		}catch(Exception e) {}
+	}
+
+}

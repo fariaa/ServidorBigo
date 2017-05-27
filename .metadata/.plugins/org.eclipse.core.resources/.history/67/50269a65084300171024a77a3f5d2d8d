@@ -1,0 +1,71 @@
+package servidor;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
+
+import bd.dbos.Jogador;
+
+public class ServirCliente extends Thread {
+	
+	private Scanner leitor;
+	private Socket socket;
+	private Sorteio sorteio;
+	private boolean ganhador;
+	
+	public ServirCliente(Socket socket, Sorteio sorteio)
+	{
+		this.socket = socket; 
+		this.sorteio = sorteio;
+		
+		try{
+			leitor = new Scanner(socket.getInputStream());
+		}catch(IOException e){ }
+	}
+	
+	@Override
+	public void run() {
+		String msg;
+		try{
+			while((msg = leitor.nextLine()) != null)
+			{
+				System.out.println(msg);
+				if(msg.contains("B:")){
+					System.out.println("BINGO!!!!");
+					String[] partes = msg.split(";");
+					Integer codigo = Integer.parseInt(partes[1]);
+					String[] listaNum = partes[2].split(",");
+					System.out.println("codigo: " + codigo + "\n lista: " + listaNum.toString());
+					Integer numeros[] = new Integer[listaNum.length];
+					int cont = 0;
+					for(String l: listaNum)
+					{
+						numeros[cont] = Integer.parseInt(l);
+					}
+					this.sorteio.confereJogo(codigo, numeros, this.ganhador);
+				}
+				
+				if(this.ganhador)
+				{
+					//ganhou o bingo!!!
+				}
+				
+				if(msg.contains("C:")){
+					String[] partes = msg.split(";");
+					Integer codigo = Integer.parseInt(partes[1]);
+					String  email = partes[2];
+					String  senha = partes[3];
+					
+					try
+					{
+						new Thread(new Cadastro(codigo, email, senha, this.socket)).start();
+					}catch(Exception ex){
+						
+					}
+				}
+			}
+			
+		}catch(Exception ex){ }
+	}
+}

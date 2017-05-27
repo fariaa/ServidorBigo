@@ -1,0 +1,21 @@
+package servidor;
+
+import java.net.Socket;
+import java.util.Scanner;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+public class Record extends Thread {
+	
+	private PrintWriter escritor;
+	
+	public Record(Socket cliente) throws IOException
+	{
+		this.escritor = new PrintWriter(cliente.getOutputStream());
+	}
+	
+	public void run()
+	{
+		
+	}
+}

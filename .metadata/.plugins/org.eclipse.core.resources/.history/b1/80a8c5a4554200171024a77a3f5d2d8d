@@ -1,0 +1,52 @@
+package servidor;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
+
+import bd.dbos.Jogador;
+
+private class ServirCliente extends Thread {
+	Scanner leitor;
+	Socket socketUtil;
+	
+	public ServirCliente(Socket socket)
+	{
+		socketUtil = socket; 
+		try{
+			leitor = new Scanner(socket.getInputStream());
+		}catch(IOException e){ }
+	}
+	
+	@Override
+	public void run() {
+		String msg;
+		try{
+			while((msg = leitor.nextLine()) != null){
+				//login
+				System.out.println(leitor.nextLine());
+				if(msg.contains("AUTENTICACAO"))
+				{
+					System.out.println("Entrou no validador");
+					// msg: "AUTENTICACAO;EMAIL;SENHA"
+					String[] partes = msg.split(";");
+					String email = partes[1];
+					String senha = partes[2];
+					Jogador j = autenticacao(email, senha);
+					System.out.println("jogador: " + j.getCodigo());
+					if(j != null)
+					{
+						//Criar um PrintWriter para cada jogador
+						PrintWriter escritor = new PrintWriter(socketUtil.getOutputStream());
+						escritor.println("tab: " + cartelas.get(indexCartela).toString());
+						escritor.println("AUTENTICAO:CONECTADO;" + cartelas.get(indexCartela).toString());
+						escritor.flush();
+						indexCartela++;
+						escritores.add(escritor);
+					}
+				}
+			}
+		}catch(Exception ex){ }
+	}
+}

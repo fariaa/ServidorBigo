@@ -1,0 +1,14 @@
+package servidor;
+
+import bd.daos.Jogadores;
+
+public class Cadastro{
+	
+	private Jogadores jogadoresDao = new Jogadores();
+	
+	public boolean criar(int codigo, String email, String senha)
+	{
+		
+		return false;
+	}
+}

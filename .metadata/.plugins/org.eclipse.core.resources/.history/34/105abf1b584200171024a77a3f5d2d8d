@@ -1,0 +1,78 @@
+package servidor;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.TreeSet;
+
+public class Sorteio extends Thread{
+	
+	private List<Socket> listaCliente;
+	private TreeSet<Integer> listaSorteio = new TreeSet<Integer>();
+	private TreeSet<Integer> listaSorteado = new TreeSet<Integer>();
+	private Random sorteio;
+	private boolean isParar;
+	private int codigoJogador= 0;
+	private Integer listaNumeros[];
+	
+	public Sorteio(List<Socket> listaCliente)
+	{
+		this.listaCliente = listaCliente;
+		this.sorteio = new Random();
+		
+		while(listaSorteio.size() <= 75)
+		{
+			listaSorteio.add(sorteio.nextInt(75)+1);
+		}
+	}
+	
+	public void confeJogo(int codigoJogador, Integer listaNumeros[])
+	{
+		this.isParar = true;
+		this.codigoJogador = codigoJogador;
+		this.listaNumeros = listaNumeros;
+	}
+	
+	private List<PrintWriter> listaEscritores() throws IOException
+	{
+		List<PrintWriter> ret = new ArrayList<PrintWriter>();
+		for(Socket s: this.listaCliente)
+		{
+			ret.add(new PrintWriter(s.getOutputStream()));
+		}
+		return ret;
+	}
+	
+	private void enviarSorteio(Integer numero) throws IOException
+	{
+		List<PrintWriter> listaEsc = this.listaEscritores();
+		for(PrintWriter e: listaEsc)
+		{
+			e.println(numero);
+			e.flush();
+		}
+	}
+	
+	public void run()
+	{
+		try
+		{
+			while(true)
+			{
+				if(this.isParar){
+					
+				}
+				this.sleep(3000);
+				Integer numero = this.listaSorteio.iterator();
+				this.listaSorteado.add(numero);
+				this.enviarSorteio(numero);
+			}
+		}catch(Exception ex){
+			
+		}
+	}
+	
+}

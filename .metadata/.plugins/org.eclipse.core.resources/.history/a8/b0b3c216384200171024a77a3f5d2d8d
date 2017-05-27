@@ -1,0 +1,13 @@
+package servidor;
+
+import java.net.ServerSocket;
+
+public class ExecutaServidor {
+	ServerSocket servidor;
+	
+	public static void main(String[] args) {
+		
+		servidor = new ServerSocket(5000);
+	}
+
+}

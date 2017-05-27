@@ -1,0 +1,36 @@
+package servidor;
+
+import java.net.Socket;
+import java.util.Scanner;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+public class Record extends Thread {
+	
+	private PrintWriter escritor;
+	private boolean acesso;
+	
+	public void setAcesso(boolean acesso)
+	{
+		this.acesso = acesso;
+	}
+	
+	public Record(Socket cliente) throws IOException
+	{
+		System.out.println("Entrou");
+		this.escritor = new PrintWriter(cliente.getOutputStream());
+	}
+	
+	public void run()
+	{
+		while(!acesso)
+		{
+			this.sleep(5000);
+			System.out.println("Olá mundo");
+			this.escritor.println("Olá mano!!");
+			this.escritor.flush();
+			//mandar lista de jogadores records
+			
+		}
+	}
+}

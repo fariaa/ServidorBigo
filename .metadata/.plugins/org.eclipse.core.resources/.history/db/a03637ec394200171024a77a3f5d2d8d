@@ -1,0 +1,55 @@
+package servidor;
+
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
+
+import bd.dbos.Jogador;
+
+public class Acesso extends Thread {
+	private Socket cliente;
+	private Scanner leitor;
+	private Record record;
+	private boolean isAcesso;
+	
+	private void isAcesso(boolean isAcesso)
+	{
+		this.isAcesso = isAcesso;
+	}
+	
+	public Acesso(Socket cliente, Record record)
+	{
+		this.record = record;
+		this.cliente = cliente;
+	}
+	
+	
+	public void run()
+	{
+		String teclado;
+		while(!isAcesso)
+		{
+			teclado = leitor.nextLine();
+			if(teclado.contains("AUTENTICACAO"))
+			{
+				System.out.println("Entrou no validador");
+				// msg: "AUTENTICACAO;EMAIL;SENHA"
+				String[] partes = msg.split(";");
+				String email = partes[1];
+				String senha = partes[2];
+				Jogador j = autenticacao(email, senha);
+				System.out.println("jogador: " + j.getCodigo());
+				if(j != null)
+				{
+					//Criar um PrintWriter para cada jogador
+					PrintWriter escritor = new PrintWriter(socketUtil.getOutputStream());
+					escritor.println("tab: " + cartelas.get(indexCartela).toString());
+					escritor.println("AUTENTICAO:CONECTADO;" + cartelas.get(indexCartela).toString());
+					escritor.flush();
+					indexCartela++;
+					escritores.add(escritor);
+				}
+			}
+		}
+	}
+}

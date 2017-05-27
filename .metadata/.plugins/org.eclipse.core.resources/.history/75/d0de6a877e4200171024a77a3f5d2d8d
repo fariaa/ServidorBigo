@@ -1,0 +1,15 @@
+package servidor;
+
+import bd.daos.Jogadores;
+import bd.dbos.Jogador;
+
+public class Cadastro extends Thread{
+	
+	private Jogadores jogadoresDao = new Jogadores();
+	
+	public void criar(int codigo, String email, String senha, Socket socket) throws Exception
+	{
+		Jogador jogador = new Jogador(codigo, email, senha);
+		jogadoresDao.incluir(jogador);
+	}
+}

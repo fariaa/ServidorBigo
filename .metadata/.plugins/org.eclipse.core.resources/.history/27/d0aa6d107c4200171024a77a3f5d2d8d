@@ -1,0 +1,16 @@
+package servidor;
+
+import bd.daos.Jogadores;
+import bd.dbos.Jogador;
+
+public class Cadastro{
+	
+	private Jogadores jogadoresDao = new Jogadores();
+	
+	public void criar(int codigo, String email, String senha) throws Exception
+	{
+		Jogador jogador = new Jogador(codigo, email, senha);
+		jogadoresDao.incluir(jogador);
+		return false;
+	}
+}

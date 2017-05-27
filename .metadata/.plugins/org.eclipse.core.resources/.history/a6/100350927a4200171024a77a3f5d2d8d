@@ -1,0 +1,8 @@
+package servidor;
+
+public class Cadastro extends Thread{
+	public Cadastro(int codigo, String email, String senha)
+	{
+		
+	}
+}

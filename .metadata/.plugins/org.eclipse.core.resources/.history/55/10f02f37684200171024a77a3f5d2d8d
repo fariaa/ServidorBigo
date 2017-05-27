@@ -1,0 +1,48 @@
+package servidor;
+
+import java.net.Socket;
+import java.util.List;
+import java.util.Scanner;
+
+import bd.daos.Jogadores;
+import bd.dbos.Jogador;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+public class Record extends Thread {
+	
+	private PrintWriter escritor;
+	private boolean acesso;
+	private Jogadores jogadoresDao;
+	
+	public void setAcesso(boolean acesso)
+	{
+		this.acesso = acesso;
+	}
+	
+	public Record(Socket cliente) throws IOException
+	{
+		System.out.println("Entrou");
+		this.escritor = new PrintWriter(cliente.getOutputStream());
+	}
+	
+	public void run()
+	{
+		while(!acesso)
+		{
+			List<Jogador> records = j.getJogadoresRecords();
+			String jogadoresRecords ="";
+			for(Jogador jo: records)
+			{
+				jogadoresRecords += jo.getEmail() + "," + jo.getQtdVitoriasMes() + ";\n"; 
+				System.out.println("Jogador: " + jo.getCodigo());
+			}
+			//System.out.println("Olá mundo");
+			this.escritor.println("Olá mano!!");
+			this.escritor.flush();
+			//mandar lista de jogadores records
+			
+		}
+	}
+}

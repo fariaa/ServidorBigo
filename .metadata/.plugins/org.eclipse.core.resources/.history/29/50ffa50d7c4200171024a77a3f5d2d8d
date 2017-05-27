@@ -1,0 +1,16 @@
+package servidor;
+
+import bd.daos.Jogadores;
+import bd.dbos.Jogador;
+
+public class Cadastro{
+	
+	private Jogadores jogadoresDao = new Jogadores();
+	
+	public boolean criar(int codigo, String email, String senha)
+	{
+		Jogador jogador = new Jogador(codigo, email, senha);
+		jogadoresDao.incluir(jogador);
+		return false;
+	}
+}

@@ -1,0 +1,18 @@
+package servidor;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class ExecutaServidor {
+	
+	public static void main(String[] args) {
+		try
+		{
+			Servidor servidor =  new Servidor();
+			servidor.start();
+			
+		}catch(Exception e) {}
+	}
+
+}
